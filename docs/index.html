@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weather App</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css">
+  <style>
+    /* 🌌 Aurora Borealis Gradient Sky */
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      perspective: 1200px;
+      color: #e0e6ed;
+    }
+
+    /* 🔮 Header & Navbar (Neon Glow) */
+    header.navbar {
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .navbar-brand {
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #00e5ff;
+      text-shadow: 0 0 8px #00e5ff;
+    }
+    .navbar .form-control {
+      background: rgba(255,255,255,0.05);
+      border: none;
+      color: #e0e6ed;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+    }
+    .navbar .form-control::placeholder { color: rgba(224,230,237,0.6); }
+    .navbar .btn {
+      background: #00e5ff;
+      border: none;
+      color: #000;
+      font-weight: 700;
+      letter-spacing: 1px;
+      transition: background 0.3s, transform 0.3s;
+      text-shadow: none;
+    }
+    .navbar .btn:hover {
+      background: #00b8cc;
+      transform: scale(1.05) translateZ(10px);
+    }
+
+    /* 🏠 Container */
+    .container {
+      max-width: 620px;
+      margin-top: 3rem;
+      padding: 0 1rem;
+    }
+
+    /* ❄️ Weather Card (Glowing Glass + 3D) */
+    .weather-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(255,255,255,0.1);
+      backdrop-filter: blur(16px);
+      padding: 2rem;
+      transform-style: preserve-3d;
+      transition: transform 0.5s ease, box-shadow 0.5s ease;
+    }
+    .weather-card:hover {
+      transform: translateY(-20px) rotateX(12deg) scale(1.05);
+      box-shadow: 0 0 30px rgba(0, 229, 255, 0.6), inset 0 0 12px rgba(255,255,255,0.2);
+    }
+
+    /* 📈 Metrics Grid (Digital Neon) */
+    .row.gx-4.gy-4 { --bs-gutter-x: 2rem; --bs-gutter-y: 2rem; }
+    .metric {
+      font-size: 2.75rem;
+      font-weight: 800;
+      color: #00e5ff;
+      text-shadow: 0 0 8px rgba(0,229,255,0.8), 0 0 16px rgba(0,229,255,0.6);
+      background: rgba(0,0,0,0.2);
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      transform-style: preserve-3d;
+      animation: neonPop 0.6s ease forwards;
+      opacity: 0;
+    }
+    .metric:nth-child(n) { animation-delay: calc(0.1s * var(--bs-gutter-x)); }
+    .metric:hover {
+      transform: translateZ(25px) rotateY(7deg);
+      text-shadow: 0 0 12px rgba(0,229,255,1), 0 0 24px rgba(0,229,255,0.8);
+    }
+    .metric + small {
+      display: block;
+      color: rgba(224,230,237,0.7);
+      margin-top: 0.35rem;
+    }
+
+    /* ✨ Collapse Button */
+    .btn-link {
+      color: #00e5ff;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: color 0.3s;
+    }
+    .btn-link:hover { text-decoration: none; color: #00b8cc; }
+
+    /* 🚨 Search Error */
+    #errorMsg {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #ff1744;
+      font-weight: 700;
+    }
+
+    /* 💥 Animations */
+    @keyframes neonPop {
+      0% { transform: translateY(30px) scale(0.8); opacity: 0; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* 📱 Mobile Tweaks */
+    @media (max-width: 576px) {
+      .metric { font-size: 2.25rem; }
+      .container { padding: 0 0.5rem; margin-top: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar navbar-expand-lg px-3 py-2">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">🌤️ Weather</a>
+      <form id="searchForm" class="d-flex ms-auto">
+        <input id="cityInput" class="form-control me-2" type="text" placeholder="Enter city…">
+        <button type="submit" class="btn">Search</button>
+      </form>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="errorMsg" class="d-none">Could not fetch weather data.</div>
+    <section class="text-center my-4">
+      <h1 class="mb-4">Weather for <span id="cityName">—</span></h1>
+      <div class="weather-card mx-auto" style="max-width: 480px;">
+        <div class="row gx-4 gy-4 text-center">
+          <div class="col-6">
+            <div class="metric" id="temp_c">—</div>
+            <small>°C</small>
+          </div>
+          <div class="col-6">
+            <div class="metric" id="temp_f">—</div>
+            <small>°F</small>
+          </div>
+          <div class="col-6">
+            <div class="metric" id="humidity">—</div>
+            <small>Humidity</small>
+          </div>
+          <div class="col-6">
+            <div class="metric" id="wind_kph">—</div>
+            <small>Wind kph</small>
+          </div>
+          <div class="col-6">
+            <div class="metric" id="wind_mph">—</div>
+            <small>Wind mph</small>
+          </div>
+          <div class="col-6">
+            <div class="metric" id="cloud">—</div>
+            <small>Cloud %</small>
+          </div>
+        </div>
+        <p class="mt-4">
+          <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#details">More details</button>
+        </p>
+        <div class="collapse" id="details">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-transparent text-white">Feels like: <span id="feelslike_c">—</span>°C / <span id="feelslike_f">—</span>°F</li>
+            <li class="list-group-item bg-transparent text-white">Visibility: <span id="vis_km">—</span> km / <span id="vis_miles">—</span> mi</li>
+            <li class="list-group-item bg-transparent text-white">UV Index: <span id="uv">—</span></li>
+            <li class="list-group-item bg-transparent text-white">Gust: <span id="gust_kph">—</span> kph / <span id="gust_mph">—</span> mph</li>
+            <li class="list-group-item bg-transparent text-white">Last updated: <span id="last_updated">—</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const apiKey = '5d34143acb1d4a9f85a145751250207';
+    const elems = {
+      cityName: document.getElementById('cityName'),
+      temp_c: document.getElementById('temp_c'),
+      temp_f: document.getElementById('temp_f'),
+      humidity: document.getElementById('humidity'),
+      wind_kph: document.getElementById('wind_kph'),
+      wind_mph: document.getElementById('wind_mph'),
+      cloud: document.getElementById('cloud'),
+      feelslike_c: document.getElementById('feelslike_c'),
+      feelslike_f: document.getElementById('feelslike_f'),
+      vis_km: document.getElementById('vis_km'),
+      vis_miles: document.getElementById('vis_miles'),
+      uv: document.getElementById('uv'),
+      gust_kph: document.getElementById('gust_kph'),
+      gust_mph: document.getElementById('gust_mph'),
+      last_updated: document.getElementById('last_updated'),
+      errorMsg: document.getElementById('errorMsg'),
+    };
+
+    async function fetchWeather(city) {
+      elems.errorMsg.classList.add('d-none');
+      try {
+        const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${encodeURIComponent(city)}`);
+        if (!res.ok) throw new Error('Network response was not ok');
+        const { location, current } = await res.json();
+        elems.cityName.textContent = location.name;
+        Object.entries(current).forEach(([k,v]) => { if (elems[k]) elems[k].textContent = v; });
+      } catch (e) {
+        console.error(e);
+        elems.errorMsg.classList.remove('d-none');
+      }
+    }
+
+    document.getElementById('searchForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const city = document.getElementById('cityInput').value.trim();
+      if (city) fetchWeather(city);
+    });
+
+    // Initial load
+    fetchWeather('Delhi');
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
